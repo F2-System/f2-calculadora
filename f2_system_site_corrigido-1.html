@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>F2 SYSTEM | Calculadora</title>
+<style>
+:root{--bg:#090910;--panel:#151521;--panel2:#0d0d16;--purple:#a66bff;--purple2:#7d45ce;--text:#f4f0fc;--muted:#aaa4ba;--border:#37304b}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#1b1230 0,#090910 48%);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--text);min-height:100vh}
+header{padding:26px 18px 16px;text-align:center;border-bottom:1px solid #272137;background:#0b0a12cc;position:sticky;top:0;z-index:5;backdrop-filter:blur(12px)}
+.logo{font-weight:900;letter-spacing:2px;font-size:28px}.logo span{color:var(--purple)}.sub{color:var(--muted);font-size:11px;letter-spacing:2px;margin-top:5px}
+nav{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:18px}nav button{background:transparent;color:#d7c5f6;border:1px solid var(--border);border-radius:10px;padding:10px 14px;cursor:pointer}nav button.active,nav button:hover{background:#2a1942;border-color:var(--purple)}
+main{width:min(760px,100%);padding:24px 16px 60px;margin:auto}.card{background:linear-gradient(145deg,#171622,#11111b);border:1px solid var(--border);border-radius:20px;padding:22px;margin:0 0 18px;box-shadow:0 12px 35px #0003}
+h1{font-size:25px;margin:0 0 8px}h2{font-size:21px;margin:0 0 8px}.muted{color:var(--muted);line-height:1.55;font-size:14px}.field{margin-top:20px}label{display:block;margin:0 0 9px;font-size:15px;color:#e6def4}
+select,input{width:100%;background:#090910;color:#fff;border:1px solid #554174;border-radius:13px;padding:16px 14px;font-size:16px;min-height:54px;outline:none}select:focus,input:focus{border-color:var(--purple);box-shadow:0 0 0 3px #a66bff28}select option{background:#11111b;color:white}
+.checkrow{display:flex;align-items:center;gap:10px;margin-top:18px;color:#e6def4;font-size:14px}.checkrow input{width:18px;height:18px;min-height:auto;accent-color:var(--purple)}
+.pricebox{margin-top:20px;background:#26183d;border:1px solid #7046a6;border-radius:16px;padding:22px;text-align:center}.price-label{font-size:11px;letter-spacing:1.5px;color:#cbb6ee}.price{font-size:34px;font-weight:850;margin:5px 0}.pack{color:#e1d3f7;font-size:14px}
+.btn{display:block;width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(100deg,#8546d6,#b477ff);color:white;font-weight:750;font-size:15px;margin-top:16px;cursor:pointer}.btn:active{transform:scale(.99)}.btn.secondary{background:#241a34;border:1px solid #5a3d7f}.hidden{display:none!important}
+.notice{padding:13px;border:1px solid #65502d;background:#211b11;border-radius:12px;color:#f2d9a4;font-size:13px;line-height:1.5;margin-top:14px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}.tour{background:#0d0d16;border:1px solid var(--border);border-radius:13px;padding:15px}.tour strong{display:block;margin-bottom:5px}.tour span{color:#c6a2ff;font-weight:750}
+.small{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
+@media(max-width:420px){.card{padding:18px}.grid{grid-template-columns:1fr 1fr}h1{font-size:23px}}
+</style>
+</head>
+<body>
+<header><div class="logo">F2 <span>SYSTEM</span></div><div class="sub">ROCKET LEAGUE · SERVIÇOS</div><nav><button class="active" data-tab="calc">Calculadora</button><button data-tab="tours">Torneios</button></nav></header>
+<main>
+<section id="calc">
+<div class="card">
+<h1>Calculadora de preços</h1><p class="muted">Selecione seu rank atual e o rank desejado para consultar uma estimativa.</p>
+<div class="field"><label for="current">Rank atual</label><select id="current"></select></div>
+<div class="field"><label for="desired">Rank desejado</label><select id="desired"></select></div>
+<label class="checkrow"><input type="checkbox" id="reward"> Desejo a recompensa da temporada do rank atual (+ R$ 7,00)</label>
+<div class="pricebox"><div class="price-label">VALOR ESTIMADO</div><div class="price" id="price">R$ 0,00</div><div class="pack" id="pack">Selecione os ranks</div></div>
+<p class="small" id="calcNote">Os valores entre divisões são estimados proporcionalmente. Confirme o preço final antes da compra.</p>
+</div>
+<div class="card">
+<h2>Solicitar serviço</h2><p class="muted">Escolha seu upador preferido. O pedido só será enviado quando o sistema de pedidos estiver conectado.</p>
+<div class="field"><label for="upador">Qual upador você quer?</label><select id="upador"><option value="F2C">F2C</option><option value="AlessandroS">AlessandroS</option></select></div>
+<div id="psnNotice" class="notice hidden"><strong>Atenção:</strong> o upador solicitado utiliza uma conta PSN para realizar o serviço. Se você já tiver uma conta PSN conectada, será necessário fornecer o acesso a essa conta; caso contrário, não será possível realizar o serviço com ele. Se ainda não tiver uma conta PSN conectada, será necessário conectar a conta dele antes de iniciar o serviço.</div>
+<button class="btn" id="request">Solicitar serviço</button>
+<p id="requestMsg" class="small" aria-live="polite">O envio só ficará disponível depois que a integração com o bot do Discord for configurada.</p>
+</div>
+</section>
+<section id="tours" class="hidden">
+<div class="card"><h1>Torneios</h1><p class="muted">Valores de inscrição por categoria. Grand Champion não está incluído.</p>
+<div class="grid">
+<div class="tour"><strong>Bronze</strong><span>R$ 4,00</span></div><div class="tour"><strong>Prata</strong><span>R$ 6,00</span></div>
+<div class="tour"><strong>Ouro</strong><span>R$ 8,00</span></div><div class="tour"><strong>Platina</strong><span>R$ 10,00</span></div>
+<div class="tour"><strong>Diamante</strong><span>R$ 12,00</span></div><div class="tour"><strong>Champion</strong><span>R$ 15,00</span></div>
+</div></div>
+</section>
+</main>
+<script>
+(() => {
+const ranks = [
+{name:"Bronze I",tier:0},{name:"Bronze II",tier:0},{name:"Bronze III",tier:0},
+{name:"Prata I",tier:1},{name:"Prata II",tier:1},{name:"Prata III",tier:1},
+{name:"Ouro I",tier:2},{name:"Ouro II",tier:2},{name:"Ouro III",tier:2},
+{name:"Platina I",tier:3},{name:"Platina II",tier:3},{name:"Platina III",tier:3},
+{name:"Diamante I",tier:4},{name:"Diamante II",tier:4},{name:"Diamante III",tier:4},
+{name:"Champion I",tier:5},{name:"Champion II",tier:5},{name:"Champion III",tier:5},
+{name:"Grand Champion",tier:6}
+];
+const base=[75,65,55,45,35,25,0];
+const current=document.getElementById('current'), desired=document.getElementById('desired'), reward=document.getElementById('reward');
+ranks.forEach((r,i)=>{current.add(new Option(r.name,String(i)));desired.add(new Option(r.name,String(i)));});
+current.value="0";desired.value="18";
+function tierPrice(i){if(i>=18)return 0;const t=Math.floor(i/3);const pos=i%3;const next=base[Math.min(t+1,6)];return base[t]-(base[t]-next)*(pos/3);}
+function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
+function calculate(){const a=Number(current.value),b=Number(desired.value);let total=Math.max(0,tierPrice(a)-tierPrice(b))+(reward.checked?7:0);document.getElementById('price').textContent=money(total);let name='';if(b<=a){name='O rank desejado deve ser superior ao rank atual.';}else{let ti=ranks[a].tier;name=ti===0?'Bronze ao GC':ti===1?'Prata ao GC':ti===2?'Ouro ao GC':ti===3?'Platina ao GC':ti===4?'Diamante ao GC':ti===5?'Champion ao GC':'Seleção de rank';}document.getElementById('pack').textContent=name;}
+current.addEventListener('change',calculate);desired.addEventListener('change',calculate);reward.addEventListener('change',calculate);calculate();
+const upador=document.getElementById('upador'),psn=document.getElementById('psnNotice');upador.addEventListener('change',()=>psn.classList.toggle('hidden',upador.value!=='AlessandroS'));
+document.getElementById('request').addEventListener('click',()=>{document.getElementById('requestMsg').textContent='Seu pedido ainda não foi enviado: falta conectar a API do bot do Discord.';});
+document.querySelectorAll('nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));document.getElementById('calc').classList.toggle('hidden',btn.dataset.tab!=='calc');document.getElementById('tours').classList.toggle('hidden',btn.dataset.tab!=='tours');}));
+})();
+</script>
+</body></html>
