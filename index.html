@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="pt-BR">
 <head>
@@ -15,7 +16,7 @@ h1{font-size:25px;margin:0 0 8px}h2{font-size:21px;margin:0 0 8px}.muted{color:v
 select,input{width:100%;background:#090910;color:#fff;border:1px solid #554174;border-radius:13px;padding:16px 14px;font-size:16px;min-height:54px;outline:none}select:focus,input:focus{border-color:var(--purple);box-shadow:0 0 0 3px #a66bff28}select option{background:#11111b;color:white}
 .checkrow{display:flex;align-items:center;gap:10px;margin-top:18px;color:#e6def4;font-size:14px}.checkrow input{width:18px;height:18px;min-height:auto;accent-color:var(--purple)}
 .pricebox{margin-top:20px;background:#26183d;border:1px solid #7046a6;border-radius:16px;padding:22px;text-align:center}.price-label{font-size:11px;letter-spacing:1.5px;color:#cbb6ee}.price{font-size:34px;font-weight:850;margin:5px 0}.pack{color:#e1d3f7;font-size:14px}
-.btn{display:block;width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(100deg,#8546d6,#b477ff);color:white;font-weight:750;font-size:15px;margin-top:16px;cursor:pointer}.btn:active{transform:scale(.99)}.btn.secondary{background:#241a34;border:1px solid #5a3d7f}.hidden{display:none!important}
+.btn{display:block;width:100%;padding:15px;border:0;border-radius:12px;background:linear-gradient(100deg,#8546d6,#b477ff);color:white;font-weight:750;font-size:15px;margin-top:16px;cursor:pointer}.btn:active{transform:scale(.99)}.btn.secondary{background:#241a34;border:1px solid #5a3d7f}.btn:disabled{opacity:.6;cursor:wait}.hidden{display:none!important}
 .notice{padding:13px;border:1px solid #65502d;background:#211b11;border-radius:12px;color:#f2d9a4;font-size:13px;line-height:1.5;margin-top:14px}
 .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px}.tour{background:#0d0d16;border:1px solid var(--border);border-radius:13px;padding:15px}.tour strong{display:block;margin-bottom:5px}.tour span{color:#c6a2ff;font-weight:750}
 .small{font-size:12px;color:var(--muted);line-height:1.5;margin-top:14px}
@@ -35,11 +36,11 @@ select,input{width:100%;background:#090910;color:#fff;border:1px solid #554174;b
 <p class="small" id="calcNote">Os valores entre divisões são estimados proporcionalmente. Confirme o preço final antes da compra.</p>
 </div>
 <div class="card">
-<h2>Solicitar serviço</h2><p class="muted">Escolha seu upador preferido. O pedido só será enviado quando o sistema de pedidos estiver conectado.</p>
+<h2>Solicitar serviço</h2><p class="muted">Escolha seu upador preferido. O pedido será enviado ao ticket do Discord.</p>
 <div class="field"><label for="upador">Qual upador você quer?</label><select id="upador"><option value="F2C">F2C</option><option value="AlessandroS">AlessandroS</option></select></div>
 <div id="psnNotice" class="notice hidden"><strong>Atenção:</strong> o upador solicitado utiliza uma conta PSN para realizar o serviço. Se você já tiver uma conta PSN conectada, será necessário fornecer o acesso a essa conta; caso contrário, não será possível realizar o serviço com ele. Se ainda não tiver uma conta PSN conectada, será necessário conectar a conta dele antes de iniciar o serviço.</div>
 <button class="btn" id="request">Solicitar serviço</button>
-<p id="requestMsg" class="small" aria-live="polite">O envio só ficará disponível depois que a integração com o bot do Discord for configurada.</p>
+<p id="requestMsg" class="small" aria-live="polite">Abra esta calculadora pelo botão do ticket no Discord para enviar o pedido.</p>
 </div>
 </section>
 <section id="tours" class="hidden">
@@ -53,6 +54,9 @@ select,input{width:100%;background:#090910;color:#fff;border:1px solid #554174;b
 </main>
 <script>
 (() => {
+const API_URL = 'https://f2-system-api.onrender.com/pedido';
+const ticket = new URLSearchParams(window.location.search).get('ticket');
+
 const ranks = [
 {name:"Bronze I",tier:0},{name:"Bronze II",tier:0},{name:"Bronze III",tier:0},
 {name:"Prata I",tier:1},{name:"Prata II",tier:1},{name:"Prata III",tier:1},
@@ -68,11 +72,54 @@ ranks.forEach((r,i)=>{current.add(new Option(r.name,String(i)));desired.add(new 
 current.value="0";desired.value="18";
 function tierPrice(i){if(i>=18)return 0;const t=Math.floor(i/3);const pos=i%3;const next=base[Math.min(t+1,6)];return base[t]-(base[t]-next)*(pos/3);}
 function money(v){return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});}
-function calculate(){const a=Number(current.value),b=Number(desired.value);let total=Math.max(0,tierPrice(a)-tierPrice(b))+(reward.checked?7:0);document.getElementById('price').textContent=money(total);let name='';if(b<=a){name='O rank desejado deve ser superior ao rank atual.';}else{let ti=ranks[a].tier;name=ti===0?'Bronze ao GC':ti===1?'Prata ao GC':ti===2?'Ouro ao GC':ti===3?'Platina ao GC':ti===4?'Diamante ao GC':ti===5?'Champion ao GC':'Seleção de rank';}document.getElementById('pack').textContent=name;}
+function calculate(){const a=Number(current.value),b=Number(desired.value);let total=Math.max(0,tierPrice(a)-tierPrice(b))+(reward.checked?7:0);document.getElementById('price').textContent=money(total);let name='';if(b<=a){name='O rank desejado deve ser superior ao rank atual.';}else{let ti=ranks[a].tier;name=ti===0?'Bronze ao GC':ti===1?'Prata ao GC':ti===2?'Ouro ao GC':ti===3?'Platina ao GC':ti===4?'Diamante ao GC':ti===5?'Champion ao GC':'Seleção de rank';}document.getElementById('pack').textContent=name;return total;}
 current.addEventListener('change',calculate);desired.addEventListener('change',calculate);reward.addEventListener('change',calculate);calculate();
-const upador=document.getElementById('upador'),psn=document.getElementById('psnNotice');upador.addEventListener('change',()=>psn.classList.toggle('hidden',upador.value!=='AlessandroS'));
-document.getElementById('request').addEventListener('click',()=>{document.getElementById('requestMsg').textContent='Seu pedido ainda não foi enviado: falta conectar a API do bot do Discord.';});
-document.querySelectorAll('nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));document.getElementById('calc').classList.toggle('hidden',btn.dataset.tab!=='calc');document.getElementById('tours').classList.toggle('hidden',btn.dataset.tab!=='tours');}));
+const upador=document.getElementById('upador'),psn=document.getElementById('psnNotice');
+upador.addEventListener('change',()=>psn.classList.toggle('hidden',upador.value!=='AlessandroS'));
+
+document.getElementById('request').addEventListener('click', async () => {
+ const msg=document.getElementById('requestMsg');
+ const button=document.getElementById('request');
+ const a=Number(current.value), b=Number(desired.value);
+ if(!ticket){msg.textContent='Abra a calculadora pelo botão do ticket privado no Discord. O link não contém o token do ticket.';return;}
+ if(b<=a){msg.textContent='O rank desejado precisa ser superior ao rank atual.';return;}
+ const total=calculate();
+ button.disabled=true;
+ button.textContent='Enviando...';
+ msg.textContent='Enviando seu pedido ao ticket do Discord...';
+ try{
+   const response=await fetch(API_URL,{
+     method:'POST',
+     headers:{'Content-Type':'application/json'},
+     body:JSON.stringify({
+       ticket,
+       current_rank:ranks[a].name,
+       desired_rank:ranks[b].name,
+       reward:reward.checked,
+       upador:upador.value,
+       price:money(total)
+     })
+   });
+   const result=await response.json().catch(()=>({}));
+   if(!response.ok){
+     msg.textContent=result.detail || `Não foi possível enviar o pedido (HTTP ${response.status}).`;
+   }else{
+     msg.textContent='Pedido enviado ao ticket do Discord com sucesso!';
+   }
+ }catch(error){
+   msg.textContent='Não foi possível conectar à API. Tente novamente em instantes.';
+ }finally{
+   button.disabled=false;
+   button.textContent='Solicitar serviço';
+ }
+});
+
+document.querySelectorAll('nav button').forEach(btn=>btn.addEventListener('click',()=>{
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b===btn));
+ document.getElementById('calc').classList.toggle('hidden',btn.dataset.tab!=='calc');
+ document.getElementById('tours').classList.toggle('hidden',btn.dataset.tab!=='tours');
+}));
 })();
 </script>
-</body></html>
+</body>
+</html>
